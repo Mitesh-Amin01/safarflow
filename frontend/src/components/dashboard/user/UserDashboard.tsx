@@ -4,6 +4,10 @@ import gsap from 'gsap';
 import Sidebar from './components/Sidebar';
 import MainWorkspace from './components/MainWorkspace';
 import RightPanel from './components/RightPanel';
+import ExpeditionsView from './components/ExpeditionsView';
+import TransmissionsView from './components/TransmissionsView';
+import AssetVaultView from './components/AssetVaultView';
+import SettingsView from './components/SettingsView';
 
 // --- Types & Mock Data ---
 const ACTIVE_TRIPS = [
@@ -13,6 +17,7 @@ const ACTIVE_TRIPS = [
 
 const Dashboard = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [activeSection, setActiveSection] = useState('Concierge Hub');
     const container = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
@@ -26,10 +31,32 @@ const Dashboard = () => {
         { name: 'Remaining', value: 800 },
     ];
 
+    const renderContent = () => {
+        switch (activeSection) {
+            case 'Concierge Hub':
+                return <MainWorkspace trips={ACTIVE_TRIPS} />;
+            case 'Journeys':
+                return <ExpeditionsView />;
+            case 'Real-time Connect':
+                return <TransmissionsView />;
+            case 'Logistics Vault':
+                return <AssetVaultView />;
+            case 'System Profile':
+                return <SettingsView />;
+            default:
+                return <MainWorkspace trips={ACTIVE_TRIPS} />;
+        }
+    };
+
     return (
-        <div ref={container} className="flex h-screen bg-background-base text-text-main font-sans overflow-hidden">
-            <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-            <MainWorkspace trips={ACTIVE_TRIPS} />
+        <div ref={container} className="flex h-screen bg-background-base text-text-main font-sans">
+            <Sidebar 
+                isCollapsed={isCollapsed} 
+                setIsCollapsed={setIsCollapsed} 
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+            />
+            {renderContent()}
             <RightPanel budgetData={budgetData} />
         </div>
     );

@@ -1,17 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-/* 🎨 Palette: "Cosmos Tech" (Deep Indigo & Vibrant Purple) */
+/* 🎨 Palette: "Startup Premium" (High-Contrast Slate & Electric Violet) */
 
 @theme {
-    --font-sans: 'Outfit', sans-serif;
+    --font-sans: 'Inter', sans-serif;
+    --font-heading: 'Plus Jakarta Sans', sans-serif;
 
-    /* Cosmos Deep Backgrounds */
-    --color-background-base: #05020b;
-    --color-background: #090312;
-    --color-background-light: #150A26;
+    /* Deep Slate Backgrounds */
+    --color-background-base: #020617;
+    --color-background: #0f172a;
+    --color-background-light: #1e293b;
 
-    /* Cosmos Vibrant Purples */
+    /* Electric Violet Primary */
     --color-primary: #9671FF;
     --color-primary-light: #BCA3FF;
     --color-primary-dark: #6B3DFF;
@@ -37,16 +38,20 @@
 body {
     background-color: var(--background);
     background-image:
-        radial-gradient(ellipse at 50% 0%, rgba(150, 113, 255, 0.15) 0%, rgba(9, 3, 18, 0) 70%),
-        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-    background-size: 100% 100%, 80px 80px, 80px 80px;
+        radial-gradient(ellipse at 50% 0%, rgba(150, 113, 255, 0.12) 0%, rgba(2, 6, 23, 0) 70%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 60px 60px, 60px 60px;
     background-position: center top;
     background-attachment: fixed;
     color: var(--text-main);
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 ::selection {
