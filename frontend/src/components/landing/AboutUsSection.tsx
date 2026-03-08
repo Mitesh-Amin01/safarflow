@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -35,7 +35,7 @@ const AboutUsSection = () => {
     }, { scope: container });
 
     return (
-        <section ref={container} className="relative py-24 px-6 bg-background-base text-text-main font-sans">
+        <section id="about" ref={container} className="relative py-24 px-6 bg-background-base text-text-main font-sans">
             <div className="max-w-7xl mx-auto space-y-32">
 
                 {/* --- Section 1: About Us --- */}
@@ -45,9 +45,9 @@ const AboutUsSection = () => {
                             <img
                                 src={founderMitesh}
                                 alt="Founder"
-                                className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                                className="w-full h-full object-cover grayscale-20 group-hover:grayscale-0 transition-all duration-700"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-background-base/80 to-transparent opacity-60" />
+                            <div className="absolute inset-0 bg-linear-to-t from-background-base/80 to-transparent opacity-60" />
                         </div>
                     </div>
 
@@ -119,7 +119,7 @@ const AboutUsSection = () => {
                 </div>
 
                 {/* --- Section 3: Call to Action Frame --- */}
-                <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border border-borders group">
+                <div className="relative w-full aspect-21/9 rounded-4xl overflow-hidden border border-borders group">
                     <div className="absolute inset-0 bg-background-light/40 backdrop-blur-sm z-10" />
 
                     {/* Placeholder for your background shot */}

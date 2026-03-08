@@ -35,7 +35,7 @@ export default function HowItWorks() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="w-full bg-background relative z-10 py-24 px-6 md:px-12 lg:px-20 mx-auto max-w-[1800px] overflow-hidden">
+        <section id="how-it-works" ref={containerRef} className="w-full bg-background relative z-10 py-24 px-6 md:px-12 lg:px-20 mx-auto max-w-[1800px] overflow-hidden">
 
             {/* Background elements */}
             <div className="absolute inset-0 z-0 bg-background pointer-events-none opacity-50 bg-[radial-gradient(ellipse_at_center,rgba(150,113,255,0.05)_0%,transparent_70%)]"></div>

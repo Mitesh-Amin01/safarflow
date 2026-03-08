@@ -2,13 +2,18 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link, useLocation } from 'react-router-dom';
+import { HashLink } from 'react-router-hash-link';
+
 import logoImage from '../../assets/logo/logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Footer() {
     const footerRef = useRef<HTMLElement>(null);
+    const location = useLocation();
 
+    // The GSAP hook will automatically revert and re-run on route changes
     useGSAP(() => {
         const tl = gsap.timeline({
             scrollTrigger: {
@@ -29,7 +34,7 @@ export default function Footer() {
             "-=0.4"
         );
 
-    }, { scope: footerRef });
+    }, { scope: footerRef, dependencies: [location.pathname] });
 
     return (
         <footer ref={footerRef} className="relative w-full min-h-screen bg-[#05020A] pt-24 pb-8 overflow-hidden flex flex-col justify-between">
@@ -52,7 +57,7 @@ export default function Footer() {
                     </h2>
 
                     {/* Button */}
-                    <button className="group flex items-center justify-center gap-4 bg-white/5 backdrop-blur-md border border-white/10 hover:border-primary/50 hover:bg-white/10 text-white rounded-full px-8 py-4 md:py-3 pr-4 md:pr-3 transition-all duration-300 shadow-[0_0_30px_rgba(150,113,255,0.1)] hover:shadow-[0_0_40px_rgba(150,113,255,0.25)] shrink-0 self-start xl:self-auto xl:mb-4">
+                    <Link to="/signup" className="group flex items-center justify-center gap-4 bg-white/5 backdrop-blur-md border border-white/10 hover:border-primary/50 hover:bg-white/10 text-white rounded-full px-8 py-4 md:py-3 pr-4 md:pr-3 transition-all duration-300 shadow-[0_0_30px_rgba(150,113,255,0.1)] hover:shadow-[0_0_40px_rgba(150,113,255,0.25)] shrink-0 self-start xl:self-auto xl:mb-4">
                         <span className="text-lg font-medium tracking-wide pl-2">Get Started</span>
                         <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white relative overflow-hidden">
                             <svg className="w-5 h-5 absolute transform group-hover:translate-x-8 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -62,7 +67,7 @@ export default function Footer() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </div>
-                    </button>
+                    </Link>
 
                 </div>
 
@@ -82,10 +87,10 @@ export default function Footer() {
 
                     {/* Navigation Links */}
                     <div className="flex flex-wrap items-center justify-start md:justify-end gap-x-6 gap-y-4 lg:gap-8 max-w-[600px]">
-                        <a href="#" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">How It Works</a>
-                        <a href="#" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">Powerful Features</a>
-                        <a href="#" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">About</a>
-                        <a href="/contact-us" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">Contact</a>
+                        <HashLink smooth to="/#how-it-works" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">How It Works</HashLink>
+                        <HashLink smooth to="/#features" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">Powerful Features</HashLink>
+                        <HashLink smooth to="/#about" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">About</HashLink>
+                        <Link to="/contact-us" className="text-white hover:text-primary text-md lg:text-lg font-medium transition-colors">Contact</Link>
                     </div>
                 </div>
             </div>
@@ -109,17 +114,17 @@ export default function Footer() {
 
                     {/* Legal Links (Center) */}
                     <div className="flex flex-wrap justify-center gap-6">
-                        <a href="#" className="hover:text-white transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-white transition-colors">Terms</a>
-                        <a href="#" className="hover:text-white transition-colors">Cookies</a>
+                        <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                        <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+                        <Link to="/cookies" className="hover:text-white transition-colors">Cookies</Link>
                     </div>
 
                     {/* Social Links (Right) */}
                     <div className="flex flex-wrap justify-center gap-6">
-                        <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
-                        <a href="#" className="hover:text-white transition-colors">Twitter</a>
-                        <a href="#" className="hover:text-white transition-colors">Instagram</a>
-                        <a href="#" className="hover:text-white transition-colors">GitHub</a>
+                        <Link to="https://www.linkedin.com/in/mitesh-amin/" className="hover:text-white transition-colors">LinkedIn</Link>
+                        <Link to="https://x.com/MITESHAMIN001" className="hover:text-white transition-colors">Twitter</Link>
+                        <Link to="https://www.instagram.com/er_mitesh_amin" className="hover:text-white transition-colors">Instagram</Link>
+                        <Link to="https://github.com/Mitesh-Amin01" className="hover:text-white transition-colors">GitHub</Link>
                     </div>
                 </div>
             </div>

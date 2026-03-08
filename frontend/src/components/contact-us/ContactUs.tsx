@@ -1,6 +1,6 @@
-import React from 'react';
+
 import founderMitesh from '../../assets/founder/founder-mitesh.png'; // Using provided founder image
-import { FiArrowRight, FiMail, FiPhone, FiCalendar } from 'react-icons/fi'; // Icons for professional look
+import { FiArrowRight, FiMail } from 'react-icons/fi'; // Icons for professional look
 
 const ContactUsSection = () => {
     return (
@@ -14,7 +14,7 @@ const ContactUsSection = () => {
                 <div className="w-full lg:w-1/2 space-y-12">
 
                     {/* Founder & Message Container */}
-                    <div className="relative group max-w-sm rounded-[2rem] overflow-hidden border border-borders bg-background-light p-6">
+                    <div className="relative group max-w-sm rounded-4xl overflow-hidden border border-borders bg-background-light p-6">
                         {/* Image: Greyed out initially, color on hover */}
                         <div className="relative rounded-2xl overflow-hidden mb-6 aspect-square">
                             <img
@@ -23,7 +23,7 @@ const ContactUsSection = () => {
                                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                             />
                             {/* Theme Overlay - matches image_2 gradient overlay style */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-background-base to-transparent opacity-80" />
+                            <div className="absolute inset-0 bg-linear-to-t from-background-base to-transparent opacity-80" />
                         </div>
 
                         {/* Text Block - Uses text-muted for that clean tech feel */}
@@ -91,12 +91,12 @@ const ContactUsSection = () => {
                         </div>
 
                         {/* Submit Button - Elevated from design image, now high-end tech button */}
-                        <button type="submit" className="relative group flex w-full items-center justify-center gap-4 py-5 bg-text-main text-background-base font-black rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_40px_rgba(150,113,255,0.4)]">
+                        <button type="submit" className="relative cursor-pointer group flex w-full items-center justify-center gap-4 py-5 bg-text-main text-background-base font-black rounded-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_40px_rgba(150,113,255,0.4)]">
                             {/* White flash on hover */}
-                            <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 skew-y-12 z-10" />
+                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 skew-y-12 z-10" />
 
                             {/* Color layer - is always background-base but text becomes primary on hover */}
-                            <div className="absolute inset-0 bg-background-base translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 delay-100 z-0" />
+                            <div className="absolute inset-0 bg-background-base translate-y-full group-hover:translate-y-0 transition-transform duration-500 delay-100 z-0" />
 
                             <span className="relative z-20 group-hover:text-primary-light transition-colors delay-100 uppercase tracking-widest text-sm">Send Inquiry</span>
                             <FiArrowRight className="relative z-20 group-hover:translate-x-2 transition-transform duration-300 delay-100 text-lg group-hover:text-primary-light" />

@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { HashLink } from 'react-router-hash-link';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { FaPlus } from 'react-icons/fa';
@@ -81,11 +82,11 @@ export default function Navbar() {
     }, [menuOpen]);
 
     const navLinks = [
-        { name: 'Home', path: '/' },
-        { name: 'Explore', path: '/explore' },
-        { name: 'Destinations', path: '/destinations' },
-        { name: 'About', path: '/about' },
-        { name: 'Pricing', path: '/pricing' }
+        { name: 'Home', path: '/#' },
+        { name: 'About', path: '/#about' },
+        { name: 'Feature', path: '/#features' },
+        { name: 'How it Work', path: '/#how-it-works' },
+        { name: 'Contact', path: '/contact-us' }
     ];
 
     const closeMenu = () => setMenuOpen(false);
@@ -153,13 +154,14 @@ export default function Navbar() {
                             {navLinks.map((item) => (
                                 <div key={item.name} className="overflow-hidden flex items-center group">
                                     <div className={`w-6 h-6 shrink-0 mt-3 mr-6 ${location.pathname === item.path ? 'bg-primary' : 'bg-transparent'}`}></div>
-                                    <Link
+                                    <HashLink
+                                        smooth
                                         to={item.path}
                                         onClick={closeMenu}
-                                        className={`menu-link-item block text-[4rem] sm:text-[4.5rem] lg:text-[5.5rem] font-medium tracking-tight transition-colors duration-200 leading-[1.1] ${location.pathname === item.path ? 'text-primary' : 'text-white hover:text-gray-300'}`}
+                                        className={`menu-link-item block text-[4rem] sm:text-[4.5rem] lg:text-[5.5rem] font-medium tracking-tight transition-colors duration-200 leading-[1.1] ${location.pathname + location.hash === item.path ? 'text-primary' : 'text-white hover:text-gray-300'}`}
                                     >
                                         {item.name}
-                                    </Link>
+                                    </HashLink>
                                 </div>
                             ))}
                         </div>
@@ -167,27 +169,25 @@ export default function Navbar() {
                         {/* 2. Contact and Info (Middle) */}
                         <div className="lg:col-span-3 flex flex-col justify-start gap-12 text-[13px] text-gray-300 mt-6 tracking-wide ml-0 lg:ml-8">
                             <div className="menu-info">
-                                <h4 className="uppercase text-gray-500 font-mono mb-4 text-[10px] tracking-[0.2em] font-semibold">Contact</h4>
-                                <p className="mb-6 hover:text-primary transition-colors cursor-pointer">contact@safarflow.tech</p>
+                                <h4 className="uppercase text-gray-500 font-mono mb-4 text-[10px] tracking-[0.2em] font-semibold">Contact & Social</h4>
+                                <a href="mailto:hello@safarflow.com" className="block mb-8 hover:text-primary transition-colors cursor-pointer text-lg font-medium text-white">hello@safarflow.com</a>
 
-                                <p className="mb-1 hover:text-primary transition-colors cursor-pointer">Julian: julian@safarflow.tech</p>
-                                <p className="mb-6 hover:text-primary transition-colors cursor-pointer">Adrian: adrian@safarflow.tech</p>
-
-                                <p className="mb-1 hover:text-primary transition-colors cursor-pointer">Instagram: @safarflow_studio</p>
-                                <p className="mb-1 hover:text-primary transition-colors cursor-pointer">LinkedIn: @safarflow-studio</p>
-                                <p className="hover:text-primary transition-colors cursor-pointer">Github: @SafarFlowStudio</p>
+                                <a href="https://www.instagram.com/er_mitesh_amin" className="block mb-2 hover:text-primary transition-colors cursor-pointer">Instagram</a>
+                                <a href="https://www.linkedin.com/in/mitesh-amin/" className="block mb-2 hover:text-primary transition-colors cursor-pointer">LinkedIn</a>
+                                <a href="https://x.com/MITESHAMIN001" className="block mb-2 hover:text-primary transition-colors cursor-pointer">Twitter</a>
+                                <a href="https://github.com/Mitesh-Amin01" className="block hover:text-primary transition-colors cursor-pointer">GitHub</a>
                             </div>
 
-                            <div className="menu-info">
-                                <h4 className="uppercase text-gray-500 font-mono mb-4 text-[10px] tracking-[0.2em] font-semibold">Working Globally</h4>
+                            <div className="menu-info mt-2">
+                                <h4 className="uppercase text-gray-500 font-mono mb-4 text-[10px] tracking-[0.2em] font-semibold">Platform Status</h4>
 
-                                <div className="flex gap-4 items-start mb-3">
-                                    <div className="w-2 h-2 bg-primary mt-[5px] shrink-0"></div>
-                                    <p className="font-mono text-[11px] uppercase tracking-wider text-gray-300 max-w-[200px] leading-relaxed">Accepting Projects. Join the Waitlist.</p>
+                                <div className="flex gap-4 items-start mb-4">
+                                    <div className="w-2 h-2 rounded-full bg-green-500 mt-[5px] shrink-0 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                                    <p className="font-mono text-[11px] uppercase tracking-wider text-gray-300 max-w-[200px] leading-relaxed">System Online. All Services Operational.</p>
                                 </div>
-                                <div className="flex gap-4 items-center">
-                                    <div className="w-2 h-2 bg-primary shrink-0"></div>
-                                    <p className="font-mono text-[10px] uppercase tracking-wider text-primary">Only 3 Spots Left</p>
+                                <div className="flex gap-4 items-start border-t border-white/5 pt-4">
+                                    <div className="w-2 h-2 rounded-full bg-primary mt-[5px] shrink-0"></div>
+                                    <p className="font-mono text-[11px] uppercase tracking-wider text-primary max-w-[200px] leading-relaxed">Designing the Next Era of Travel.</p>
                                 </div>
                             </div>
                         </div>
