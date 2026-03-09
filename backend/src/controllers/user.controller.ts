@@ -53,6 +53,7 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
         if (!email) {
             throw new ApiError(400, "Google account must have an email");
         }
+        console.log(`🔍 Checking if user exists: ${email}`);
 
         // Check if user exists
         let user = await User.findOne({ email });
@@ -83,7 +84,9 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
         const refreshToken = (user as any).generateRefreshToken();
 
         user.refreshToken = refreshToken;
+        console.log(`💾 [PROD-DEBUG] Persisting refreshToken for Google User: ${user.email}`);
         await user.save({ validateBeforeSave: false });
+        console.log(`✅ [PROD-DEBUG] User successfully updated in DB: ${user._id}`);
 
         const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
@@ -294,7 +297,9 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
     // 6. Update Refresh Token in DB
     user.refreshToken = refreshToken;
+    console.log(`💾 [PROD-DEBUG] Persisting refreshToken for Login User: ${email}`);
     await user.save({ validateBeforeSave: false });
+    console.log(`✅ [PROD-DEBUG] User successfully updated in DB: ${user._id}`);
 
     // 7. Get user without password
     const loggedInUser = await User.findById(user._id).select("-password");

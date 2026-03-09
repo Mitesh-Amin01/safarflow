@@ -11,7 +11,7 @@ const startServer = async () => {
     try {
         // Database Connection
         console.log('⏳ Connecting to MongoDB...');
-        
+
         mongoose.connection.on('connected', () => console.log('✅ Mongoose connected to DB'));
         mongoose.connection.on('error', (err) => console.error('❌ Mongoose connection error:', err));
         mongoose.connection.on('disconnected', () => console.log('⚠️ Mongoose disconnected'));
