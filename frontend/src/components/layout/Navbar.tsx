@@ -5,6 +5,8 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { FaPlus } from 'react-icons/fa';
 import logo from '../../assets/logo/logo.png';
+import { useAuth } from '../../utils/AuthContext';
+
 
 export default function Navbar() {
     const navContainerRef = useRef<HTMLElement>(null);
@@ -14,6 +16,8 @@ export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const location = useLocation();
+    const { user } = useAuth();
+
 
     // Scroll opacity functionality
     useEffect(() => {
@@ -86,7 +90,8 @@ export default function Navbar() {
         { name: 'About', path: '/#about' },
         { name: 'Feature', path: '/#features' },
         { name: 'How it Work', path: '/#how-it-works' },
-        { name: 'Contact', path: '/contact-us' }
+        { name: 'Contact', path: '/contact-us' },
+        ...(user ? [{ name: 'Dashboard', path: '/dashboard' }] : []),
     ];
 
     const closeMenu = () => setMenuOpen(false);
@@ -122,11 +127,13 @@ export default function Navbar() {
                     {/* Right: Solid Action Button */}
                     <div className="hidden md:flex items-center justify-end z-50 w-48 nav-cta">
                         <Link
-                            to="/signup"
+                            to={user ? "/dashboard" : "/signup"}
                             onClick={closeMenu}
                             className="flex items-stretch bg-primary text-white font-semibold uppercase tracking-[0.15em] text-[10px] hover:bg-primary-light transition-colors"
                         >
-                            <span className="px-5 py-2 flex items-center">Let's Work Together</span>
+                            <span className="px-5 py-2 flex items-center">
+                                {user ? "Dashboard" : "Let's Work Together"}
+                            </span>
                             <div className="border-l border-white/20 px-4 py-4 flex flex-col justify-center items-center">
                                 <FaPlus className="text-white text-sm" />
                             </div>
@@ -139,7 +146,7 @@ export default function Navbar() {
             {/* Menu Overlay Container (85vh approx like reference) */}
             <div
                 ref={overlayRef}
-                className="fixed top-0 left-0 right-0 z-40 bg-[#0e071b] border-b border-borders/50 h-[90vh] flex flex-col pt-[100px]"
+                className="fixed top-0 left-0 right-0 z-40 bg-[#0e071b] border-b border-borders/50 h-screen flex flex-col pt-[100px]"
                 style={{
                     // Initial state: clipped to the top line (invisible)
                     clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)'
@@ -158,7 +165,7 @@ export default function Navbar() {
                                         smooth
                                         to={item.path}
                                         onClick={closeMenu}
-                                        className={`menu-link-item block text-[4rem] sm:text-[4.5rem] lg:text-[5.5rem] font-medium tracking-tight transition-colors duration-200 leading-[1.1] ${location.pathname + location.hash === item.path ? 'text-primary' : 'text-white hover:text-gray-300'}`}
+                                        className={`menu-link-item block text-[4rem] sm:text-[4.5rem] lg:text-[5rem] font-medium tracking-tight transition-colors duration-200 leading-[1.1] ${location.pathname + location.hash === item.path ? 'text-primary' : 'text-white hover:text-gray-300'}`}
                                     >
                                         {item.name}
                                     </HashLink>

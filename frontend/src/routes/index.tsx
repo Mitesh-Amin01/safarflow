@@ -4,12 +4,12 @@ import FeaturesGrid from "../components/landing/FeaturesGrid";
 import HowItWorks from "../components/landing/HowItWorks";
 import AboutUsSection from "../components/landing/AboutUsSection";
 import ContactUsSection from "../components/contact-us/ContactUs";
-import SignupPage from "../components/signup/SignUpPage";
-import LoginPage from "../components/login/LoginPage";
 import PrivacyPolicy from "../components/legal/PrivacyPolicy";
 import TermsOfService from "../components/legal/TermsOfService";
 import CookiePolicy from "../components/legal/CookiePolicy";
 import UserDashboard from "../components/dashboard/user/UserDashboard";
+import SignupPage from "../components/signup/SignUpPage";
+import LoginPage from "../components/login/LoginPage";
 import { Navigate } from "react-router-dom";
 
 export const routes: RouteObject[] = [
@@ -29,12 +29,12 @@ export const routes: RouteObject[] = [
         element: <ContactUsSection />,
     },
     {
-        path: "/signup",
-        element: <SignupPage />,
-    },
-    {
         path: "/login",
         element: <LoginPage />,
+    },
+    {
+        path: "/signup",
+        element: <SignupPage />,
     },
     {
         path: "/privacy",

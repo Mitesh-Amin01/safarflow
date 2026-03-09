@@ -1,17 +1,29 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff } from 'react-icons/fi';
-import axiosInstance from '../../utils/axiosInstance';
+import { loginUser, googleAuthSync } from '../../services/auth.service';
+import { useAuth } from '../../utils/AuthContext';
+
+import { useGoogleLogin } from '@react-oauth/google';
+import { FcGoogle } from 'react-icons/fc';
 
 const LoginPage = () => {
     const navigate = useNavigate();
+    const { user, login, loading: authLoading } = useAuth();
     const container = useRef<HTMLDivElement>(null);
     const orbitRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (user && !authLoading) {
+            navigate('/dashboard');
+        }
+    }, [user, authLoading, navigate]);
+
     const [showPassword, setShowPassword] = useState(false);
-    
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -21,13 +33,48 @@ const LoginPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    const handleGoogleAuthCode = async (code: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await googleAuthSync({
+                code,
+                redirectUri: window.location.origin + "/login"
+            });
+            if (data.success) {
+                login(data.data.user);
+                setSuccess("Access Granted. Redirecting...");
+                setTimeout(() => navigate('/dashboard'), 1500);
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Google authentication failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleAuth = useGoogleLogin({
+        flow: 'auth-code',
+        ux_mode: 'redirect',
+        redirect_uri: window.location.origin + "/login",
+        onError: () => setError("Google Login Failed")
+    });
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            handleGoogleAuthCode(code);
+        }
+    }, [navigate]);
+
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
-        // Clear error when user types
         if (error) setError(null);
     };
 
@@ -38,10 +85,10 @@ const LoginPage = () => {
         setSuccess(null);
 
         try {
-            await axiosInstance.post('/users/login', formData);
+            const data = await loginUser(formData);
+            login(data.data.user);
             setSuccess("Access Granted. Redirecting...");
-            
-            // Redirect after a short delay
+
             setTimeout(() => {
                 navigate('/dashboard');
             }, 1500);
@@ -53,6 +100,7 @@ const LoginPage = () => {
     };
 
     useGSAP(() => {
+        if (authLoading) return;
         const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
         // 1. Initial background warp
@@ -107,15 +155,15 @@ const LoginPage = () => {
             </div>
 
             {/* --- Level 3: The Login "Pod" (The Interface) --- */}
-            <div className="login-pod relative z-10 w-full max-w-[1100px] aspect-video md:aspect-16/8 flex flex-col md:flex-row bg-background-light/20 backdrop-blur-3xl border border-white/10 rounded-[4rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] mx-6 mt-18">
+            <div className="login-pod relative z-10 w-full max-w-[1100px] min-h-[700px] flex flex-col md:flex-row bg-background-light/20 backdrop-blur-3xl border border-white/10 rounded-[4rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] mx-6 my-12 mt-22">
 
                 {/* Visual Accent Side */}
                 <div className="hidden md:flex w-5/12 bg-linear-to-br from-primary/10 to-transparent p-12 flex-col justify-between border-r border-white/5">
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                         <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/40">
                             <FiZap className="text-primary text-xl" />
                         </div>
-                        <h3 className="text-2xl font-bold pt-4 text-text-main">Welcome Back</h3>
+                        <h3 className="text-2xl font-bold pt-4 text-text-main leading-tight">Welcome Back</h3>
                         <p className="text-text-muted text-sm leading-relaxed">Access your synchronized travel itineraries and group expenses in real-time.</p>
                     </div>
 
@@ -132,7 +180,7 @@ const LoginPage = () => {
                 </div>
 
                 {/* Form Side */}
-                <div className="w-full md:w-7/12 p-10 md:p-16 flex flex-col justify-center bg-background-base/40">
+                <div className="w-full md:w-7/12 p-8 md:p-14 flex flex-col justify-center bg-background-base/40">
                     <div className="mb-10 space-y-2 text-center md:text-left">
                         <h2 className="text-4xl font-black tracking-tight text-text-main uppercase">Login</h2>
                         <p className="text-text-muted text-sm">Access your collaborative travel workspace.</p>
@@ -156,14 +204,14 @@ const LoginPage = () => {
                                 <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Email Address</label>
                                 <div className="relative group">
                                     <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        placeholder="hello@safar.flow" 
+                                        placeholder="hello@safar.flow"
                                         required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg" 
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg"
                                     />
                                 </div>
                             </div>
@@ -172,16 +220,16 @@ const LoginPage = () => {
                                 <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Password</label>
                                 <div className="relative group">
                                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input 
-                                        type={showPassword ? "text" : "password"} 
+                                    <input
+                                        type={showPassword ? "text" : "password"}
                                         name="password"
                                         value={formData.password}
                                         onChange={handleChange}
-                                        placeholder="••••••••" 
+                                        placeholder="••••••••"
                                         required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono" 
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono"
                                     />
-                                    <button 
+                                    <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors p-1"
@@ -192,7 +240,7 @@ const LoginPage = () => {
                             </div>
                         </div>
 
-                        <button 
+                        <button
                             type="submit"
                             disabled={loading}
                             className="group relative w-full mt-8 bg-white text-background-base font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-50 disabled:hover:scale-100"
@@ -203,6 +251,24 @@ const LoginPage = () => {
                             </span>
                         </button>
                     </form>
+
+                    <div className="relative my-8">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-white/5"></div>
+                        </div>
+                        <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
+                            <span className="bg-background-base px-4 text-text-muted">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => handleGoogleAuth()}
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-4 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all font-bold group disabled:opacity-50"
+                    >
+                        <FcGoogle className="text-2xl group-hover:scale-110 transition-transform" />
+                        <span>{loading ? "AUTHENTICATING..." : "Login with Google"}</span>
+                    </button>
 
                     <p className="mt-8 text-center text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
                         Need an account? <Link to="/signup" className="text-primary-light cursor-pointer hover:text-white transition-colors">Create Account</Link>

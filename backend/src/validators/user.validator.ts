@@ -9,7 +9,7 @@ export const registerSchema = z.object({
         .regex(
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
             "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-        ),
+        ).optional(),
     avatar: z.string().url("Invalid avatar URL").optional(),
     role: z.enum(["USER", "ADMIN"]).optional(),
 });

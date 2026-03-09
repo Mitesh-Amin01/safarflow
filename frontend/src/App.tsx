@@ -12,7 +12,7 @@ import PrivacyPolicy from './components/legal/PrivacyPolicy';
 import TermsOfService from './components/legal/TermsOfService';
 import CookiePolicy from './components/legal/CookiePolicy';
 import UserDashboard from './components/dashboard/user/UserDashboard';
-// import AdminDashboard from './components/dashboard/admin/AdminDashboard';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -65,8 +65,16 @@ function AppContent() {
           <Route path="/cookies" element={<CookiePolicy />} />
 
           {/* Dashboard Routes - No Navbar/Footer here */}
-          <Route path="/dashboard" element={<Navigate to="/dashboard/user" replace />} />
-          <Route path="/dashboard/user" element={<UserDashboard />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard/user" replace />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/user" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
           {/* <Route path="/dashboard/admin" element={<AdminDashboard />} /> */}
         </Routes>
       </main>
@@ -75,11 +83,15 @@ function AppContent() {
   );
 }
 
+import { AuthProvider } from './utils/AuthContext';
+
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   )
 }
 

@@ -19,14 +19,14 @@ const RightPanel = ({ budgetData }: RightPanelProps) => {
                     <div className="absolute inset-0 bg-linear-to-b from-primary/10 to-transparent opacity-30" />
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                            <Pie 
-                                data={budgetData} 
-                                innerRadius={70} 
-                                outerRadius={95} 
-                                paddingAngle={10} 
-                                dataKey="value" 
-                                stroke="none" 
-                                startAngle={90} 
+                            <Pie
+                                data={budgetData}
+                                innerRadius={70}
+                                outerRadius={95}
+                                paddingAngle={10}
+                                dataKey="value"
+                                stroke="none"
+                                startAngle={90}
                                 endAngle={450}
                             >
                                 <Cell fill="#9671FF" className="drop-shadow-[0_0_10px_rgba(150,113,255,0.8)]" />
@@ -54,11 +54,11 @@ const RightPanel = ({ budgetData }: RightPanelProps) => {
                             <div className="absolute left-0 top-1.5 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(150,113,255,1)] ring-4 ring-primary/20" />
                             <div className="space-y-2">
                                 <p className="text-[12px] font-black uppercase tracking-widest leading-relaxed">
-                                    <span className={`${log.color}`}>{log.user}</span> 
-                                    <span className="text-text-muted mx-2">{log.action}</span> 
+                                    <span className={`${log.color}`}>{log.user}</span>
+                                    <span className="text-text-muted mx-2">{log.action}</span>
                                     <span className="text-white border-b border-white/10">{log.target}</span>
                                 </p>
-                                <p className="text-[9px] text-primary-light/40 font-black uppercase tracking-[0.2em]">{log.time} // LOG_ID_{i+104}</p>
+                                <p className="text-[9px] text-primary-light/40 font-black uppercase tracking-[0.2em]">{log.time} // LOG_ID_{i + 104}</p>
                             </div>
                         </div>
                     ))}

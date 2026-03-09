@@ -19,7 +19,19 @@ const userSchema = new Schema(
         },
         password: {
             type: String,
-            required: [true, "Password is required"],
+            required: function(this: any) {
+                return this.authType === "EMAIL";
+            },
+        },
+        authType: {
+            type: String,
+            enum: ["EMAIL", "GOOGLE"],
+            default: "EMAIL",
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true, // Allows null/missing for non-google users
         },
         avatar: {
             type: String, // Cloudinary URL
@@ -33,6 +45,16 @@ const userSchema = new Schema(
         refreshToken: {
             type: String,
         },
+        isVerified: {
+            type: Boolean,
+            default: false,
+        },
+        otp: {
+            type: String,
+        },
+        otpExpiry: {
+            type: Date,
+        },
     },
     {
         timestamps: true,
@@ -41,7 +63,7 @@ const userSchema = new Schema(
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+    if (!this.isModified("password") || !this.password) return next();
 
     try {
         const salt = await bcrypt.genSalt(10);

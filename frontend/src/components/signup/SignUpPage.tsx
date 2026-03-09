@@ -1,24 +1,78 @@
-import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff } from 'react-icons/fi';
-import axiosInstance from '../../utils/axiosInstance';
+import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
+import { registerUser, googleAuthSync, verifyOTP } from '../../services/auth.service';
+import { useAuth } from '../../utils/AuthContext';
+
+import { useGoogleLogin } from '@react-oauth/google';
 
 const SignupPage = () => {
+    const navigate = useNavigate();
+    const { user, login, loading: authLoading } = useAuth();
     const container = useRef<HTMLDivElement>(null);
     const orbitRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (user && !authLoading) {
+            navigate('/dashboard');
+        }
+    }, [user, authLoading, navigate]);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
         confirmPassword: ''
     });
+
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [otp, setOtp] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+
+    const handleGoogleAuthCode = async (code: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await googleAuthSync({
+                code,
+                redirectUri: window.location.origin + "/signup"
+            });
+            console.log("User Login Data Google:- ", data);
+            if (data.success) {
+                login(data.data.user);
+                setSuccess(true);
+                navigate('/dashboard');
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Google authentication failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleAuth = useGoogleLogin({
+        flow: 'auth-code',
+        ux_mode: 'redirect',
+        redirect_uri: window.location.origin + "/signup",
+        onError: () => setError("Google Login Failed")
+    });
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            // Clean the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            handleGoogleAuthCode(code);
+        }
+    }, [navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -31,7 +85,6 @@ const SignupPage = () => {
         setLoading(true);
         setError(null);
 
-        // Basic client-side check
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match");
             setLoading(false);
@@ -39,25 +92,49 @@ const SignupPage = () => {
         }
 
         try {
-            const response = await axiosInstance.post('/users/register', {
+            const data = await registerUser({
                 name: formData.name,
                 email: formData.email,
                 password: formData.password
             });
 
-            if (response.data.success) {
-                setSuccess(true);
-                setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+            if (data.success) {
+                setIsVerifying(true);
             }
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || "Registration failed";
-            setError(errorMessage);
+            setError(err.response?.data?.message || "Registration failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = await verifyOTP({
+                email: formData.email,
+                otp
+            });
+
+            if (data.success) {
+                login(data.data.user);
+                setSuccess(true);
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 2000);
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Verification failed. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
     useGSAP(() => {
+        if (authLoading) return;
         const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
         // 1. Initial background warp
@@ -112,15 +189,15 @@ const SignupPage = () => {
             </div>
 
             {/* --- Level 3: The Signup "Pod" (The Interface) --- */}
-            <div className="signup-pod relative z-10 w-full max-w-[1100px] aspect-video md:aspect-16/8 flex flex-col md:flex-row bg-background-light/20 backdrop-blur-3xl border border-white/10 rounded-[4rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] mx-6 mt-18">
+            <div className="signup-pod relative z-10 w-full max-w-[1100px] min-h-[700px] flex flex-col md:flex-row bg-background-light/20 backdrop-blur-3xl border border-white/10 rounded-[4rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] mx-6 mt-22 my-12">
 
                 {/* Visual Accent Side */}
                 <div className="hidden md:flex w-5/12 bg-linear-to-br from-primary/10 to-transparent p-12 flex-col justify-between border-r border-white/5">
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                         <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/40">
                             <FiZap className="text-primary text-xl" />
                         </div>
-                        <h3 className="text-2xl font-bold pt-4 text-text-main">SafarFlow - SignUp</h3>
+                        <h3 className="text-2xl font-bold pt-4 text-text-main leading-tight">SafarFlow - SignUp</h3>
                         <p className="text-text-muted text-sm leading-relaxed">Your travel itineraries are synchronized instantly across your entire group for seamless planning.</p>
                     </div>
 
@@ -137,121 +214,190 @@ const SignupPage = () => {
                 </div>
 
                 {/* Form Side */}
-                <div className="w-full md:w-7/12 p-10 md:p-16 flex flex-col justify-center bg-background-base/40">
-                    <div className="mb-10 space-y-2 text-center md:text-left">
-                        <h2 className="text-4xl font-black tracking-tight text-text-main uppercase">Create Account</h2>
-                        <p className="text-text-muted text-sm">Step into the next era of group travel planning.</p>
-                    </div>
+                <div className="w-full md:w-7/12 p-8 md:p-14 flex flex-col justify-center bg-background-base/40">
+                    {!isVerifying ? (
+                        <>
+                            <div className="mb-10 space-y-2 text-center md:text-left">
+                                <h2 className="text-4xl font-black tracking-tight text-text-main uppercase">Create Account</h2>
+                                <p className="text-text-muted text-sm">Step into the next era of group travel planning.</p>
+                            </div>
 
-                    {error && (
-                        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-sm">
-                            {error}
-                        </div>
-                    )}
+                            {error && (
+                                <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-sm animate-pulse">
+                                    {error}
+                                </div>
+                            )}
 
-                    {success && (
-                        <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 text-green-500 rounded-2xl text-sm">
-                            Registration successful! You can now <Link to="/login" className="font-bold underline">log in</Link>.
-                        </div>
-                    )}
+                            <form className="space-y-6" onSubmit={handleSubmit}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Full Name</label>
+                                        <div className="relative group">
+                                            <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={formData.name}
+                                                onChange={handleChange}
+                                                placeholder="John Doe"
+                                                required
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Email Address</label>
+                                        <div className="relative group">
+                                            <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                placeholder="hello@safar.flow"
+                                                required
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Full Name</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Password</label>
+                                        <div className="relative group">
+                                            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                name="password"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                placeholder="••••••••"
+                                                required
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors p-1"
+                                            >
+                                                {showPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Confirm Password</label>
+                                        <div className="relative group">
+                                            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
+                                            <input
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                name="confirmPassword"
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                placeholder="••••••••"
+                                                required
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors p-1"
+                                            >
+                                                {showConfirmPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="group relative w-full mt-4 bg-white text-background-base font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-50"
+                                >
+                                    <div className="absolute inset-0 bg-primary -translate-x-full group-hover:translate-x-0 transition-transform duration-500 z-0" />
+                                    <span className="relative z-10 flex items-center justify-center gap-3 group-hover:text-white transition-colors duration-300">
+                                        {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"} <FiArrowRight />
+                                    </span>
+                                </button>
+                            </form>
+
+                            <div className="relative my-8">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-white/5"></div>
+                                </div>
+                                <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
+                                    <span className="bg-background-base px-4 text-text-muted">Or continue with</span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => handleGoogleAuth()}
+                                disabled={loading}
+                                className="w-full flex items-center justify-center gap-4 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all font-bold group disabled:opacity-50"
+                            >
+                                <FcGoogle className="text-2xl group-hover:scale-110 transition-transform" />
+                                <span>{loading ? "AUTHENTICATING..." : "Sign up with Google"}</span>
+                            </button>
+
+                            <p className="mt-8 text-center text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
+                                Already registered? <Link to="/login" className="text-primary-light cursor-pointer hover:text-white transition-colors">Log In</Link>
+                            </p>
+                        </>
+                    ) : (
+                        <div className="max-w-md mx-auto w-full space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <div className="text-center space-y-4">
+                                <div className="inline-flex w-20 h-20 rounded-3xl bg-primary/20 border border-primary/40 items-center justify-center mb-4">
+                                    <FiCheckCircle className="text-4xl text-primary" />
+                                </div>
+                                <h2 className="text-3xl font-black text-white uppercase tracking-tight">Verify Email</h2>
+                                <p className="text-text-muted text-sm px-8">We've sent a 6-digit verification code to <br /><span className="text-primary-light font-bold">{formData.email}</span></p>
+                            </div>
+
+                            {error && (
+                                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-sm text-center">
+                                    {error}
+                                </div>
+                            )}
+
+                            {success && (
+                                <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-500 rounded-2xl text-sm text-center font-bold">
+                                    Email verified! Redirecting to dashboard...
+                                </div>
+                            )}
+
+                            <form onSubmit={handleVerifyOTP} className="space-y-6">
                                 <div className="relative group">
-                                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
                                     <input
                                         type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        placeholder="John Doe"
+                                        maxLength={6}
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                                        placeholder="000000"
                                         required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg"
+                                        className="w-full bg-white/5 border border-white/10 rounded-3xl py-8 text-center text-4xl font-black tracking-[0.5em] focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-white placeholder:text-white/10"
                                     />
                                 </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Email Address</label>
-                                <div className="relative group">
-                                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        placeholder="hello@safar.flow"
-                                        required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg"
-                                    />
-                                </div>
-                            </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || otp.length < 6 || success}
+                                    className="group relative w-full bg-primary text-white font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(109,40,217,0.3)] disabled:opacity-50"
+                                >
+                                    <span className="relative z-10 flex items-center justify-center gap-3">
+                                        {loading ? "VERIFYING..." : "CONFIRM CODE"} <FiArrowRight />
+                                    </span>
+                                </button>
+                            </form>
+
+                            <button
+                                onClick={() => setIsVerifying(false)}
+                                className="w-full text-center text-[10px] font-bold text-text-muted uppercase tracking-widest hover:text-white transition-colors"
+                            >
+                                Back to Registration
+                            </button>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Password</label>
-                                <div className="relative group">
-                                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        placeholder="••••••••"
-                                        required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors p-1"
-                                    >
-                                        {showPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Confirm Password</label>
-                                <div className="relative group">
-                                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        placeholder="••••••••"
-                                        required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors p-1"
-                                    >
-                                        {showConfirmPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative w-full mt-4 bg-white text-background-base font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <div className="absolute inset-0 bg-primary -translate-x-full group-hover:translate-x-0 transition-transform duration-500 z-0" />
-                            <span className="relative z-10 flex items-center justify-center gap-3 group-hover:text-white transition-colors duration-300">
-                                {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"} <FiArrowRight />
-                            </span>
-                        </button>
-                    </form>
-
-                    <p className="mt-8 text-center text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
-                        Already registered? <Link to="/login" className="text-primary-light cursor-pointer hover:text-white transition-colors">Log In</Link>
-                    </p>
+                    )}
                 </div>
             </div>
 

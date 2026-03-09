@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { Link } from 'react-router-dom';
 import { FaArrowRight } from 'react-icons/fa';
 import logo from '../../assets/logo/logo.png';
 
@@ -95,13 +96,13 @@ export default function HeroSection() {
 
                 {/* Pill CTA Button */}
                 <div className="hero-text-anim">
-                    <button className="group flex items-center gap-6 bg-white/5 backdrop-blur-md border border-white/10 hover:border-primary/50 hover:bg-white/10 text-white rounded-full px-10 py-3 pr-3 transition-all duration-300 shadow-[0_0_30px_rgba(150,113,255,0.15)] hover:shadow-[0_0_40px_rgba(150,113,255,0.3)]">
+                    <Link to="/signup" className="group flex items-center gap-6 bg-white/5 backdrop-blur-md border border-white/10 hover:border-primary/50 hover:bg-white/10 text-white rounded-full px-10 py-3 pr-3 transition-all duration-300 shadow-[0_0_30px_rgba(150,113,255,0.15)] hover:shadow-[0_0_40px_rgba(150,113,255,0.3)] inline-flex">
                         <span className="text-xl font-medium tracking-wide pl-4">Start Planning</span>
                         <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white group-hover:bg-primary-light transition-colors relative overflow-hidden">
                             <FaArrowRight className="text-xl absolute transform group-hover:translate-x-10 transition-transform duration-300" />
                             <FaArrowRight className="text-xl absolute transform -translate-x-10 group-hover:translate-x-0 transition-transform duration-300" />
                         </div>
-                    </button>
+                    </Link>
                 </div>
             </div>
 
