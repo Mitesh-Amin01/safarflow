@@ -90,12 +90,14 @@ export const googleAuth = asyncHandler(async (req: Request, res: Response) => {
         const accessTokenOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
             maxAge: 24 * 60 * 60 * 1000, // 1 day
         };
 
         const refreshTokenOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
             maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
         };
 
@@ -227,12 +229,14 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
     const accessTokenOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
         maxAge: 24 * 60 * 60 * 1000, // 1 day
     };
 
     const refreshTokenOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
         maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
     };
 
@@ -299,12 +303,14 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const accessTokenOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
         maxAge: 24 * 60 * 60 * 1000, // 1 day
     };
 
     const refreshTokenOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
         maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
     };
 
@@ -356,12 +362,14 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
         const accessTokenOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
             maxAge: 24 * 60 * 60 * 1000, // 1 day
         };
 
         const refreshTokenOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax' as any,
             maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
         };
 

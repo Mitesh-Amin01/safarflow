@@ -10,7 +10,7 @@ const app: Application = express();
 // Middleware
 app.use(((helmet as any).default || helmet)());
 app.use(cors({
-    origin: ["http://localhost:5173", "https://safarflow.online"],
+    origin: ["http://localhost:5173", "https://safarflow.online", "https://www.safarflow.online"],
     credentials: true,
 }));
 app.use(express.json());
