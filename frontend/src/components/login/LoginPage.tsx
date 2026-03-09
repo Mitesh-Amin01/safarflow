@@ -1,13 +1,56 @@
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import type { ChangeEvent, FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff } from 'react-icons/fi';
+import axiosInstance from '../../utils/axiosInstance';
 
 const LoginPage = () => {
+    const navigate = useNavigate();
     const container = useRef<HTMLDivElement>(null);
     const orbitRef = useRef<HTMLDivElement>(null);
     const [showPassword, setShowPassword] = useState(false);
+    
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        // Clear error when user types
+        if (error) setError(null);
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        setSuccess(null);
+
+        try {
+            await axiosInstance.post('/users/login', formData);
+            setSuccess("Access Granted. Redirecting...");
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1500);
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Authentication failed. Please check your credentials.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useGSAP(() => {
         const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
@@ -95,13 +138,33 @@ const LoginPage = () => {
                         <p className="text-text-muted text-sm">Access your collaborative travel workspace.</p>
                     </div>
 
-                    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    {error && (
+                        <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                            {error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className="mb-6 p-4 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                            {success}
+                        </div>
+                    )}
+
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Email Address</label>
                                 <div className="relative group">
                                     <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input type="email" placeholder="hello@safar.flow" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg" />
+                                    <input 
+                                        type="email" 
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="hello@safar.flow" 
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg" 
+                                    />
                                 </div>
                             </div>
 
@@ -111,7 +174,11 @@ const LoginPage = () => {
                                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
                                     <input 
                                         type={showPassword ? "text" : "password"} 
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
                                         placeholder="••••••••" 
+                                        required
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono" 
                                     />
                                     <button 
@@ -125,10 +192,14 @@ const LoginPage = () => {
                             </div>
                         </div>
 
-                        <button className="group relative w-full mt-8 bg-white text-background-base font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)]">
+                        <button 
+                            type="submit"
+                            disabled={loading}
+                            className="group relative w-full mt-8 bg-white text-background-base font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-50 disabled:hover:scale-100"
+                        >
                             <div className="absolute inset-0 bg-primary -translate-x-full group-hover:translate-x-0 transition-transform duration-500 z-0" />
                             <span className="relative z-10 flex items-center justify-center gap-3 group-hover:text-white transition-colors duration-300">
-                                LOGIN <FiArrowRight />
+                                {loading ? "AUTHENTICATING..." : "LOGIN"} <FiArrowRight />
                             </span>
                         </button>
                     </form>

@@ -3,12 +3,59 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff } from 'react-icons/fi';
+import axiosInstance from '../../utils/axiosInstance';
 
 const SignupPage = () => {
     const container = useRef<HTMLDivElement>(null);
     const orbitRef = useRef<HTMLDivElement>(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (error) setError(null);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        // Basic client-side check
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.post('/users/register', {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password
+            });
+
+            if (response.data.success) {
+                setSuccess(true);
+                setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+            }
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || err.message || "Registration failed";
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useGSAP(() => {
         const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
@@ -96,20 +143,48 @@ const SignupPage = () => {
                         <p className="text-text-muted text-sm">Step into the next era of group travel planning.</p>
                     </div>
 
-                    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    {error && (
+                        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-sm">
+                            {error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 text-green-500 rounded-2xl text-sm">
+                            Registration successful! You can now <Link to="/login" className="font-bold underline">log in</Link>.
+                        </div>
+                    )}
+
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Full Name</label>
                                 <div className="relative group">
                                     <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input type="text" placeholder="John Doe" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg" />
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        placeholder="John Doe"
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg"
+                                    />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-text-muted uppercase tracking-widest pl-2">Email Address</label>
                                 <div className="relative group">
                                     <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
-                                    <input type="email" placeholder="hello@safar.flow" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg" />
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="hello@safar.flow"
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-4 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -121,7 +196,11 @@ const SignupPage = () => {
                                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
                                     <input
                                         type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
                                         placeholder="••••••••"
+                                        required
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono"
                                     />
                                     <button
@@ -140,7 +219,11 @@ const SignupPage = () => {
                                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors text-lg" />
                                     <input
                                         type={showConfirmPassword ? "text" : "password"}
+                                        name="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
                                         placeholder="••••••••"
+                                        required
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 pr-12 focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-base md:text-lg tracking-widest font-mono"
                                     />
                                     <button
@@ -154,10 +237,14 @@ const SignupPage = () => {
                             </div>
                         </div>
 
-                        <button className="group relative w-full mt-4 bg-white text-background-base font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)]">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="group relative w-full mt-4 bg-white text-background-base font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                             <div className="absolute inset-0 bg-primary -translate-x-full group-hover:translate-x-0 transition-transform duration-500 z-0" />
                             <span className="relative z-10 flex items-center justify-center gap-3 group-hover:text-white transition-colors duration-300">
-                                CREATE ACCOUNT <FiArrowRight />
+                                {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"} <FiArrowRight />
                             </span>
                         </button>
                     </form>
