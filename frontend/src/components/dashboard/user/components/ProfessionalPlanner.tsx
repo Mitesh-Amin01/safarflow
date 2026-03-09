@@ -4,7 +4,7 @@ interface ProfessionalPlannerProps {
     user?: any;
 }
 
-const ProfessionalPlanner = ({ user }: ProfessionalPlannerProps) => {
+const ProfessionalPlanner = ({ }: ProfessionalPlannerProps) => {
     return (
         <main className="reveal-pane flex-1 overflow-y-auto no-scrollbar p-12 z-10 relative">
             <header className="mb-20">

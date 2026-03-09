@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { useAuth } from '../../../utils/AuthContext';
 import Sidebar from './components/Sidebar';
 import MainWorkspace from './components/MainWorkspace';
-import RightPanel from './components/RightPanel';
 import ProfessionalPlanner from './components/ProfessionalPlanner';
 import ExpeditionsView from './components/ExpeditionsView';
 import TransmissionsView from './components/TransmissionsView';
@@ -33,10 +32,7 @@ const Dashboard = () => {
         });
     }, { scope: container });
 
-    const budgetData = [
-        { name: 'Spent', value: 1200 },
-        { name: 'Remaining', value: 800 },
-    ];
+
 
     const renderContent = () => {
         switch (activeSection) {
