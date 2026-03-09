@@ -17,8 +17,10 @@ const startServer = async () => {
         mongoose.connection.on('disconnected', () => console.log('⚠️ Mongoose disconnected'));
 
         await mongoose.connect(MONGO_URI, {
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
+            connectTimeoutMS: 10000,
+            family: 4,
         } as any);
 
         console.log(`✅ MongoDB Connected Successfully (State: ${mongoose.connection.readyState})`);

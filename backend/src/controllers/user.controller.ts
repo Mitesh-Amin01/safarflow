@@ -140,7 +140,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
     const { name, email, password, avatar, role } = validation.data;
 
     // 2. Check if user already exists
-    console.log(`🔍 Checking if user exists: ${email}`);
+    console.log(`🔍 [PROD-DEBUG] Checking if user exists: ${email}`);
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
