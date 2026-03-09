@@ -8,7 +8,7 @@ import { ApiError } from './utils/ApiError.js';
 const app: Application = express();
 
 // Middleware
-app.use(helmet());
+app.use(((helmet as any).default || helmet)());
 app.use(cors({
     origin: ["http://localhost:5173", "https://safarflow.online"],
     credentials: true,
