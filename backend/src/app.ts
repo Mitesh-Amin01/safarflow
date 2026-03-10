@@ -5,7 +5,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { ApiError } from './utils/ApiError.js';
+import dotenv from "dotenv";
 
+dotenv.config();
 const app: Application = express();
 
 // Middleware
@@ -41,7 +43,7 @@ app.get('/', (req: Request, res: Response) => {
 
     if (readyState !== 1) {
         const hasUri = !!(process.env.MONGO_URI || process.env.MONGODB_URI);
-        return res.status(200).send(`SafarFlow API - Elite Travel Concierge Engine Active. [DB: ${dbStatus}] (Config check: URI_${hasUri ? 'FOUND' : 'MISSING'})`);
+        return res.status(200).send(`SafarFlow API - Elite Travel Concierge Engine Active. [DB: ${dbStatus}] (Config check: URI_${hasUri ? 'FOUND' : 'MISSING'}) ${process.env.MONGO_URI} ${process.env.MONGODB_URI}`);
     }
 
     res.status(200).send(`SafarFlow API - Elite Travel Concierge Engine Active. [DB: ${dbStatus}]`);
