@@ -36,7 +36,13 @@ app.get('/health', (req: Request, res: Response) => {
 // Root Route
 app.get('/', (req: Request, res: Response) => {
     const states = ['DISCONNECTED', 'CONNECTED', 'CONNECTING', 'DISCONNECTING'];
-    const dbStatus = states[mongoose.connection.readyState] || 'UNKNOWN';
+    const readyState = mongoose.connection.readyState;
+    const dbStatus = states[readyState] || 'UNKNOWN';
+
+    if (readyState !== 1) {
+        const hasUri = !!(process.env.MONGO_URI || process.env.MONGODB_URI);
+        return res.status(200).send(`SafarFlow API - Elite Travel Concierge Engine Active. [DB: ${dbStatus}] (Config check: URI_${hasUri ? 'FOUND' : 'MISSING'})`);
+    }
 
     res.status(200).send(`SafarFlow API - Elite Travel Concierge Engine Active. [DB: ${dbStatus}]`);
 });
