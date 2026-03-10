@@ -3,11 +3,11 @@
     "rewrites": [
         {
             "source": "/api/v1/users/(.*)",
-            "dest": "/api/index.ts"
+            "destination": "/api/index.ts"
         },
         {
             "source": "/(.*)",
-            "dest": "/api/index.ts"
+            "destination": "/api/index.ts"
         }
     ]
 }
