@@ -14,7 +14,7 @@ const app: Application = express();
 
 /* ----------------------------- Middleware ----------------------------- */
 
-app.use(helmet());
+app.use(((helmet as any).default || helmet)());
 
 app.use(
     cors({
