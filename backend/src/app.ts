@@ -1,4 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -19,7 +20,6 @@ app.use(morgan('dev'));
 
 // Routes Import
 import userRouter from "./routes/user.routes.js";
-import mongoose from 'mongoose';
 
 // Routes Declaration
 app.use("/api/v1/users", userRouter);
