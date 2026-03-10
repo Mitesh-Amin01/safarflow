@@ -19,6 +19,7 @@ app.use(morgan('dev'));
 
 // Routes Import
 import userRouter from "./routes/user.routes.js";
+import mongoose from 'mongoose';
 
 // Routes Declaration
 app.use("/api/v1/users", userRouter);
@@ -34,7 +35,10 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Root Route
 app.get('/', (req: Request, res: Response) => {
-    res.status(200).send('SafarFlow API - Elite Travel Concierge Engine Active.');
+    const states = ['DISCONNECTED', 'CONNECTED', 'CONNECTING', 'DISCONNECTING'];
+    const dbStatus = states[mongoose.connection.readyState] || 'UNKNOWN';
+
+    res.status(200).send(`SafarFlow API - Elite Travel Concierge Engine Active. [DB: ${dbStatus}]`);
 });
 
 // Global Error Handler
