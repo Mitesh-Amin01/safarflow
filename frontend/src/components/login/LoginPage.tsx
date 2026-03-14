@@ -3,9 +3,10 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff } from 'react-icons/fi';
-import { loginUser, googleAuthSync } from '../../services/auth.service';
+import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
+import { loginUser, googleAuthSync, verifyOTP } from '../../services/auth.service';
 import { useAuth } from '../../utils/AuthContext';
+import FullScreenLoader from '../ui/FullScreenLoader';
 
 import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
@@ -23,6 +24,8 @@ const LoginPage = () => {
     }, [user, authLoading, navigate]);
 
     const [showPassword, setShowPassword] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [otp, setOtp] = useState('');
 
     const [formData, setFormData] = useState({
         email: '',
@@ -48,7 +51,6 @@ const LoginPage = () => {
             }
         } catch (err: any) {
             setError(err.response?.data?.message || "Google authentication failed");
-        } finally {
             setLoading(false);
         }
     };
@@ -86,6 +88,14 @@ const LoginPage = () => {
 
         try {
             const data = await loginUser(formData);
+            
+            if (data.data && data.data.requires2FA) {
+                setIsVerifying(true);
+                setSuccess("Security check required. OTP Sent.");
+                setLoading(false);
+                return;
+            }
+
             login(data.data.user);
             setSuccess("Access Granted. Redirecting...");
 
@@ -94,7 +104,32 @@ const LoginPage = () => {
             }, 1500);
         } catch (err: any) {
             setError(err.response?.data?.message || "Authentication failed. Please check your credentials.");
-        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = await verifyOTP({
+                email: formData.email,
+                otp
+            });
+
+            if (data.success) {
+                login(data.data.user);
+                setSuccess("Security verified. Redirecting...");
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 2000);
+            } else {
+                setLoading(false);
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Verification failed. Please try again.");
             setLoading(false);
         }
     };
@@ -132,6 +167,8 @@ const LoginPage = () => {
 
     return (
         <main ref={container} className="relative min-h-screen w-full bg-background-base overflow-hidden flex items-center justify-center font-sans selection:bg-primary selection:text-white">
+
+            {loading && <FullScreenLoader message="AUTHENTICATING..." />}
 
             {/* --- Level 1: Atmospheric Background --- */}
             <div ref={orbitRef} className="absolute inset-0 pointer-events-none">
@@ -181,7 +218,9 @@ const LoginPage = () => {
 
                 {/* Form Side */}
                 <div className="w-full md:w-7/12 p-8 md:p-14 flex flex-col justify-center bg-background-base/40">
-                    <div className="mb-10 space-y-2 text-center md:text-left">
+                    {!isVerifying ? (
+                        <>
+                            <div className="mb-10 space-y-2 text-center md:text-left">
                         <h2 className="text-4xl font-black tracking-tight text-text-main uppercase">Login</h2>
                         <p className="text-text-muted text-sm">Access your collaborative travel workspace.</p>
                     </div>
@@ -273,6 +312,61 @@ const LoginPage = () => {
                     <p className="mt-8 text-center text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
                         Need an account? <Link to="/signup" className="text-primary-light cursor-pointer hover:text-white transition-colors">Create Account</Link>
                     </p>
+                        </>
+                    ) : (
+                        <div className="max-w-md mx-auto w-full space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <div className="text-center space-y-4">
+                                <div className="inline-flex w-20 h-20 rounded-3xl bg-primary/20 border border-primary/40 items-center justify-center mb-4">
+                                    <FiCheckCircle className="text-4xl text-primary" />
+                                </div>
+                                <h2 className="text-3xl font-black text-white uppercase tracking-tight">Security Check</h2>
+                                <p className="text-text-muted text-sm px-8">We've sent a 6-digit authentication code to <br /><span className="text-primary-light font-bold">{formData.email}</span></p>
+                            </div>
+
+                            {error && (
+                                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-sm text-center">
+                                    {error}
+                                </div>
+                            )}
+
+                            {success && (
+                                <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-500 rounded-2xl text-sm text-center font-bold">
+                                    {success}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleVerifyOTP} className="space-y-6">
+                                <div className="relative group">
+                                    <input
+                                        type="text"
+                                        maxLength={6}
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                                        placeholder="000000"
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-3xl py-8 text-center text-4xl font-black tracking-[0.5em] focus:outline-none focus:border-primary/50 focus:bg-primary/5 transition-all text-white placeholder:text-white/10"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || otp.length < 6 || (success !== null && success.includes("verified"))}
+                                    className="group relative w-full bg-primary text-white font-black py-5 rounded-4xl overflow-hidden hover:scale-[1.02] transition-transform duration-300 shadow-[0_20px_40px_rgba(109,40,217,0.3)] disabled:opacity-50"
+                                >
+                                    <span className="relative z-10 flex items-center justify-center gap-3">
+                                        {loading ? "VERIFYING..." : "CONFIRM CODE"} <FiArrowRight />
+                                    </span>
+                                </button>
+                            </form>
+
+                            <button
+                                onClick={() => { setIsVerifying(false); setSuccess(null); setError(null); }}
+                                className="w-full text-center text-[10px] font-bold text-text-muted uppercase tracking-widest hover:text-white transition-colors"
+                            >
+                                Back to Login
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

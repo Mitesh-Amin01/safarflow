@@ -6,6 +6,7 @@ import { FiUser, FiMail, FiLock, FiArrowRight, FiTarget, FiZap, FiEye, FiEyeOff,
 import { FcGoogle } from 'react-icons/fc';
 import { registerUser, googleAuthSync, verifyOTP } from '../../services/auth.service';
 import { useAuth } from '../../utils/AuthContext';
+import FullScreenLoader from '../ui/FullScreenLoader';
 
 import { useGoogleLogin } from '@react-oauth/google';
 
@@ -49,10 +50,11 @@ const SignupPage = () => {
                 login(data.data.user);
                 setSuccess(true);
                 navigate('/dashboard');
+            } else {
+                setLoading(false);
             }
         } catch (err: any) {
             setError(err.response?.data?.message || "Google authentication failed");
-        } finally {
             setLoading(false);
         }
     };
@@ -100,10 +102,12 @@ const SignupPage = () => {
 
             if (data.success) {
                 setIsVerifying(true);
+                setLoading(false);
+            } else {
+                setLoading(false);
             }
         } catch (err: any) {
             setError(err.response?.data?.message || "Registration failed");
-        } finally {
             setLoading(false);
         }
     };
@@ -125,10 +129,11 @@ const SignupPage = () => {
                 setTimeout(() => {
                     navigate('/dashboard');
                 }, 2000);
+            } else {
+                setLoading(false);
             }
         } catch (err: any) {
             setError(err.response?.data?.message || "Verification failed. Please try again.");
-        } finally {
             setLoading(false);
         }
     };
@@ -166,6 +171,8 @@ const SignupPage = () => {
 
     return (
         <main ref={container} className="relative min-h-screen w-full bg-background-base overflow-hidden flex items-center justify-center font-sans selection:bg-primary selection:text-white">
+
+            {loading && <FullScreenLoader message="INITIALIZING..." />}
 
             {/* --- Level 1: Atmospheric Background --- */}
             <div ref={orbitRef} className="absolute inset-0 pointer-events-none">

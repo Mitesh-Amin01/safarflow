@@ -35,7 +35,12 @@ export const refreshAccessToken = async () => {
     return response.data;
 };
 
-export const updateAccountDetails = async (userData: { name: string }) => {
+export const updateAccountDetails = async (userData: any) => {
     const response = await axiosInstance.patch('/users/update-account', userData);
+    return response.data;
+};
+
+export const deleteAccount = async () => {
+    const response = await axiosInstance.delete('/users/delete-account');
     return response.data;
 };
