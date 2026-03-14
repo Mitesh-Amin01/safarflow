@@ -69,7 +69,7 @@ export default function HeroSection() {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="relative w-full h-[222vh] bg-background-base flex flex-col items-center justify-start overflow-hidden pt-[160px] md:pt-[200px] z-10 pb-32">
+        <section ref={containerRef} className="relative w-full min-h-screen h-auto bg-background-base flex flex-col items-center justify-start overflow-hidden pt-[160px] md:pt-[200px] z-10 pb-20 md:pb-32 lg:pb-40">
 
             {/* Background Base */}
             <div className="absolute inset-0 z-0 bg-background pointer-events-none"></div>
@@ -107,7 +107,7 @@ export default function HeroSection() {
             </div>
 
             {/* Graphic Area (Phone + Connecting Nodes) */}
-            <div className="relative w-full max-w-[1200px] mx-auto mt-20 md:mt-32 h-[500px] z-20 flex justify-center items-start px-4">
+            <div className="relative w-full max-w-[1200px] mx-auto mt-20 md:mt-32 h-[750px] z-20 flex justify-center items-start px-4">
 
                 {/* SVG Connecting Lines */}
                 <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-10 hidden md:block" style={{ overflow: 'visible' }}>
